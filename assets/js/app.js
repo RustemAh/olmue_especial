@@ -2,7 +2,7 @@ const $ = (sel) => document.querySelector(sel);
 
 const gridJurado = $("#grid");
 const gridComp = $("#compGrid");
-const newsGrid = $("#newsGrid");
+const newsList = $("#newsList");
 
 const modal = $("#modal");
 const modalImg = $("#modalImg");
@@ -99,36 +99,37 @@ function renderCompetencia(list) {
   `).join("");
 }
 
-/* ===== Noticias (desde JSON local) ===== */
+/* ===== Noticias (lista estilo Epicentro Radio, desde JSON local) ===== */
 function renderNews(items) {
-  if (!newsGrid) return;
+  if (!newsList) return;
 
   if (!items || !items.length) {
-    newsGrid.innerHTML = `<p class="note">No hay noticias disponibles por ahora.</p>`;
+    newsList.innerHTML =
+      `<li class="newsitem">
+        <span class="newsitem__date"></span>
+        <span class="newsitem__title">No hay noticias disponibles por ahora.</span>
+      </li>`;
     return;
   }
 
-  newsGrid.innerHTML = items.map(n => `
-    <article class="card">
-      <div class="card__body">
-        <h3 class="card__name">${escapeHtml(n.title || "")}</h3>
-        ${n.excerpt ? `<p class="card__role">${escapeHtml(n.excerpt)}</p>` : ""}
-        <div class="news__meta">
-          <a href="${n.url}" target="_blank" rel="noopener noreferrer">Leer en Epicentro</a>
-        </div>
-      </div>
-    </article>
+  newsList.innerHTML = items.map(n => `
+    <li class="newsitem">
+      <a class="newsitem__title" href="${n.url}" target="_blank" rel="noopener noreferrer">
+        ${escapeHtml(n.title || "")}
+      </a>
+      <span class="newsitem__date">${escapeHtml(n.date || "")}</span>
+    </li>
   `).join("");
 }
 
 async function loadNews() {
-  if (!newsGrid) return;
+  if (!newsList) return;
   try {
     const r = await fetch("assets/data/noticias.json", { cache: "no-store" });
     const data = await r.json();
     renderNews(data.items || []);
   } catch (e) {
-    newsGrid.innerHTML = `<p class="note">No se pudieron cargar las noticias.</p>`;
+    renderNews([]);
   }
 }
 
@@ -197,4 +198,5 @@ async function init() {
 }
 
 init().catch(console.error);
+
 
