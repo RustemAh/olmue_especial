@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Festival — Jurado y Competencia</title>
-  <meta name="description" content="Especial con secciones Parrilla, Jurado y Competencia en tarjetas, listo para GitHub Pages." />
+  <title>Festival — Olmué 2026</title>
+  <meta name="description" content="Especial Olmué 2026: últimas noticias, parrilla, jurado y competencia." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 
@@ -15,11 +15,12 @@
     <div class="wrap topbar__inner">
       <div class="brand">
         <span class="brand__dot" aria-hidden="true"></span>
-        <span class="brand__name">ESPECIAL EPICENTRO - OLMUE 2026</span>
+        <span class="brand__name">Olmué 2026</span>
       </div>
 
       <nav class="nav" aria-label="Principal">
         <a href="#portada" class="nav__link">Portada</a>
+        <a href="#noticias" class="nav__link">Noticias</a>
         <a href="#parrilla" class="nav__link">Parrilla</a>
         <a href="#jurado" class="nav__link">Jurado</a>
         <a href="#competencia" class="nav__link">Competencia</a>
@@ -41,7 +42,20 @@
       </div>
     </section>
 
-    <!-- PARRILLA DE ARTISTAS (Imagen) -->
+    <!-- ÚLTIMAS NOTICIAS -->
+    <section id="noticias" class="section">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="section__title">Últimas noticias</h2>
+        </div>
+
+        <div id="newsGrid" class="grid grid--news" aria-live="polite"></div>
+
+        <p class="note">Fuente: Epicentro Chile (tag olmue2026)</p>
+      </div>
+    </section>
+
+    <!-- PARRILLA DE ARTISTAS -->
     <section id="parrilla" class="section">
       <div class="wrap">
         <div class="section__head">
@@ -50,12 +64,12 @@
 
         <div class="media__frame">
           <img
-            src="https://www.epicentrochile.com/wp-content/uploads/2026/01/line-up-olmue-v6.jpg"
+            src="https://www.epicentrochile.com/wp-content/uploads/2026/01/getattachmentthumbnail.jpg"
             alt="Parrilla de artistas"
             loading="lazy"
           />
         </div>
-        
+      </div>
     </section>
 
     <!-- JURADO -->
@@ -65,9 +79,11 @@
           <h2 class="section__title">Jurado</h2>
         </div>
 
-        <div id="grid" class="grid" aria-live="polite"></div>
-        
+        <p class="section__desc">
+          Desde figuras del canal estatal, hasta músicos, serán los encargados de determinar quién se llevará el premio y analizar las distintas canciones en competencia.
         </p>
+
+        <div id="grid" class="grid" aria-live="polite"></div>
       </div>
     </section>
 
@@ -79,18 +95,17 @@
         </div>
 
         <div id="compGrid" class="grid" aria-live="polite"></div>
-
       </div>
     </section>
 
-    <footer id="contacto" class="footer">
+    <footer class="footer">
       <div class="wrap footer__inner">
-        <small>© <span id="year"></span> Desarrollado por Epicentro Labs</small>
+        <small>© <span id="year"></span> Olmué 2026 · GitHub Pages</small>
       </div>
     </footer>
   </main>
 
-  <!-- Modal (solo para Jurado) -->
+  <!-- Modal (solo Jurado) -->
   <div id="modal" class="modal" hidden>
     <div class="modal__backdrop" data-close></div>
     <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -108,6 +123,8 @@
     </div>
   </div>
 
+  <seript></seript>
   <script src="assets/js/app.js" defer></script>
 </body>
 </html>
+
