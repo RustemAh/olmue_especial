@@ -373,4 +373,23 @@ body{
   height: auto;
   display: block;
 }
+/* Tarjetas Competencia (color distinto) */
+.card--comp{
+  background: #0b2a5b;           /* fondo */
+  border-color: rgba(255,255,255,.18);
+}
+
+.card--comp .card__name{
+  color: #ffffff;
+}
+
+.card--comp .card__role{
+  color: rgba(255,255,255,.80);
+}
+
+.card--comp .badge{
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.90);
+}
 
