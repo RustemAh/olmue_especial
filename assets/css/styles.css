@@ -1,11 +1,10 @@
 :root{
-  --bg: #f3f4f6;          /* gris claro fondo */
-  --surface: #ffffff;     /* contenedor / tarjetas */
-  --text: #111827;        /* negro suave */
-  --muted: #6b7280;       /* gris texto secundario */
-  --line: #e5e7eb;        /* líneas/bordes */
-  --accent: #c40000;      /* rojo tipo prensa */
-  --accent2:#111827;
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #c40000;      /* rojo */
   --radius: 12px;
   --shadow: 0 8px 18px rgba(17,24,39,.08);
 }
@@ -40,7 +39,7 @@ body{
   clip:rect(0,0,0,0); border:0;
 }
 
-/* ===== Header tipo sitio ===== */
+/* ===== Header ===== */
 .topbar{
   position: sticky; top: 0; z-index: 50;
   background: var(--surface);
@@ -66,7 +65,7 @@ body{
   box-shadow: 0 0 0 6px rgba(196,0,0,.12);
 }
 
-.brand__name{ color: var(--accent2); }
+.brand__name{ color: #111827; }
 
 .nav{
   display:flex; gap:14px; flex-wrap:wrap;
@@ -83,7 +82,7 @@ body{
   background: #f9fafb;
 }
 
-/* ===== Hero tipo “especial” ===== */
+/* ===== Hero banner ===== */
 .hero{
   padding: 18px 0 10px;
 }
@@ -101,35 +100,6 @@ body{
   width: 100%;
   height: auto;
   display: block;
-}
-
-.hero__inner{
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--accent);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px 18px;
-}
-
-.kicker{
-  margin:0;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  font-size: 12px;
-}
-
-.hero__title{
-  margin: 8px 0 6px;
-  font-size: 34px;
-  line-height: 1.1;
-}
-
-.hero__subtitle{
-  margin: 0;
-  color: var(--muted);
-  max-width: 80ch;
 }
 
 /* ===== Secciones ===== */
@@ -162,31 +132,27 @@ body{
   border-radius: 3px;
 }
 
-.section__tools{
-  min-width: 280px;
-}
-
-.input{
-  width: 100%;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-}
-
-.input:focus{
-  border-color: rgba(196,0,0,.45);
-  box-shadow: 0 0 0 4px rgba(196,0,0,.10);
-}
-
 .note{
   color: var(--muted);
   margin: 12px 0 0;
 }
 
-/* ===== Grid + cards estilo editorial ===== */
+/* ===== Parrilla (imagen) ===== */
+.media__frame{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.media__frame img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== Grid + cards ===== */
 .grid{
   display:grid;
   grid-template-columns: repeat(12, 1fr);
@@ -194,7 +160,7 @@ body{
 }
 
 .card{
-  grid-column: span 3;     /* 4 columnas desktop */
+  grid-column: span 3;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -242,7 +208,7 @@ body{
 
 .card__role + .card__role{ margin-top: 6px; }
 
-/* Badge tipo “etiqueta” */
+/* Badge */
 .badge{
   display:inline-flex;
   align-items:center;
@@ -256,7 +222,27 @@ body{
   font-size: 12px;
 }
 
-/* Footer */
+/* ===== Competencia (color distinto) ===== */
+.card--comp{
+  background: #0b2a5b;                 /* fondo */
+  border-color: rgba(255,255,255,.18); /* borde */
+}
+
+.card--comp .card__name{
+  color: #ffffff;
+}
+
+.card--comp .card__role{
+  color: rgba(255,255,255,.82);
+}
+
+.card--comp .badge{
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.92);
+}
+
+/* ===== Footer ===== */
 .footer{
   border-top: 1px solid var(--line);
   background: var(--surface);
@@ -348,48 +334,15 @@ body{
 
 /* ===== Responsive ===== */
 @media (max-width: 1020px){
-  .card{ grid-column: span 4; }  /* 3 columnas */
+  .card{ grid-column: span 4; }
 }
 @media (max-width: 760px){
   .section__head{ flex-direction:column; align-items:stretch; }
-  .section__tools{ min-width:auto; }
-  .card{ grid-column: span 6; }  /* 2 columnas */
+  .card{ grid-column: span 6; }
   .modal__content{ grid-template-columns: 1fr; }
   .modal__img{ max-height: 240px; }
 }
 @media (max-width: 480px){
-  .card{ grid-column: span 12; } /* 1 columna */
-}
-.media__frame{
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.media__frame img{
-  width: 100%;
-  height: auto;
-  display: block;
-}
-/* Tarjetas Competencia (color distinto) */
-.card--comp{
-  background: #0b2a5b;           /* fondo */
-  border-color: rgba(255,255,255,.18);
-}
-
-.card--comp .card__name{
-  color: #ffffff;
-}
-
-.card--comp .card__role{
-  color: rgba(255,255,255,.80);
-}
-
-.card--comp .badge{
-  background: rgba(255,255,255,.12);
-  border-color: rgba(255,255,255,.18);
-  color: rgba(255,255,255,.90);
+  .card{ grid-column: span 12; }
 }
 
