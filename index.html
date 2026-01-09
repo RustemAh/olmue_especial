@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Festival — Olmué 2026</title>
+  <title>Olmué 2026</title>
   <meta name="description" content="Especial Olmué 2026: últimas noticias, parrilla, jurado y competencia." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
@@ -35,23 +35,29 @@
         <div class="hero__banner">
           <img
             src="https://www.festivaldelhuaso.cl/img/banner2026.jpg"
-            alt="Banner Festival del Huaso 2026"
+            alt="Banner Festival del Huaso de Olmué 2026"
             loading="eager"
           />
         </div>
       </div>
     </section>
 
-    <!-- ÚLTIMAS NOTICIAS -->
+    <!-- ÚLTIMAS NOTICIAS (estilo Epicentro Radio) -->
     <section id="noticias" class="section">
       <div class="wrap">
         <div class="section__head">
           <h2 class="section__title">Últimas noticias</h2>
         </div>
 
-        <div id="newsGrid" class="grid grid--news" aria-live="polite"></div>
+        <div class="newsbox">
+          <ul id="newsList" class="newslist" aria-live="polite"></ul>
 
-        <p class="note">Fuente: Epicentro Chile</p>
+          <a class="newsbox__more"
+             href="https://www.epicentrochile.com/tag/olmue2026/"
+             target="_blank" rel="noopener noreferrer">
+            Más noticias en EpicentroChile.com
+          </a>
+        </div>
       </div>
     </section>
 
@@ -100,7 +106,7 @@
 
     <footer class="footer">
       <div class="wrap footer__inner">
-        <small>© <span id="year"></span> Olmué 2026 · Desarrollado por Equipo Epicentro Labs</small>
+        <small>© <span id="year"></span> Olmué 2026 · GitHub Pages</small>
       </div>
     </footer>
   </main>
@@ -123,8 +129,6 @@
     </div>
   </div>
 
-  <seript></seript>
   <script src="assets/js/app.js" defer></script>
 </body>
 </html>
-
