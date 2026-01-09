@@ -1,10 +1,8 @@
 const $ = (sel) => document.querySelector(sel);
 
 const gridJurado = $("#grid");
-const qJurado = $("#q");
-
 const gridComp = $("#compGrid");
-const qComp = $("#qc");
+const newsGrid = $("#newsGrid");
 
 const modal = $("#modal");
 const modalImg = $("#modalImg");
@@ -14,9 +12,7 @@ const modalBio = $("#modalBio");
 const modalLinks = $("#modalLinks");
 
 let jurado = [];
-let juradoView = [];      // lo que está renderizado (para modal con filtros)
 let competencia = [];
-let competenciaView = []; // lo que está renderizado
 
 function escapeHtml(str = "") {
   return String(str).replace(/[&<>"']/g, (m) => ({
@@ -28,9 +24,7 @@ function escapeHtml(str = "") {
   }[m]));
 }
 
-/* =========================
-   Modal Jurado
-========================= */
+/* ===== Modal Jurado ===== */
 function openModal(person) {
   if (!modal || !person) return;
 
@@ -59,20 +53,16 @@ function closeModal() {
   document.body.style.overflow = "";
 }
 
-/* =========================
-   Render Jurado
-========================= */
+/* ===== Render Jurado ===== */
 function renderJurado(list) {
   if (!gridJurado) return;
 
-  juradoView = Array.isArray(list) ? list : [];
-
-  if (!juradoView.length) {
-    gridJurado.innerHTML = `<p class="note">No hay resultados.</p>`;
+  if (!list.length) {
+    gridJurado.innerHTML = `<p class="note">No hay jurado para mostrar.</p>`;
     return;
   }
 
-  gridJurado.innerHTML = juradoView.map((p, idx) => `
+  gridJurado.innerHTML = list.map((p, idx) => `
     <article class="card" role="button" tabindex="0"
       aria-label="Ver ${escapeHtml(p.name || "integrante")}"
       data-jurado-idx="${idx}">
@@ -88,35 +78,16 @@ function renderJurado(list) {
   `).join("");
 }
 
-function filterJurado() {
-  if (!qJurado) return renderJurado(jurado);
-
-  const term = (qJurado.value || "").trim().toLowerCase();
-  if (!term) return renderJurado(jurado);
-
-  const filtered = jurado.filter(p =>
-    (p.name || "").toLowerCase().includes(term) ||
-    (p.role || "").toLowerCase().includes(term) ||
-    (p.tag || "").toLowerCase().includes(term)
-  );
-
-  renderJurado(filtered);
-}
-
-/* =========================
-   Render Competencia
-========================= */
+/* ===== Render Competencia ===== */
 function renderCompetencia(list) {
   if (!gridComp) return;
 
-  competenciaView = Array.isArray(list) ? list : [];
-
-  if (!competenciaView.length) {
-    gridComp.innerHTML = `<p class="note">No hay resultados.</p>`;
+  if (!list.length) {
+    gridComp.innerHTML = `<p class="note">No hay competencia para mostrar.</p>`;
     return;
   }
 
-  gridComp.innerHTML = competenciaView.map((c, idx) => `
+  gridComp.innerHTML = list.map((c, idx) => `
     <article class="card card--comp" aria-label="Competencia ${idx + 1}">
       <div class="card__body">
         <span class="badge">#${idx + 1}</span>
@@ -128,32 +99,47 @@ function renderCompetencia(list) {
   `).join("");
 }
 
-function filterCompetencia() {
-  if (!qComp) return renderCompetencia(competencia);
+/* ===== Noticias (desde JSON local) ===== */
+function renderNews(items) {
+  if (!newsGrid) return;
 
-  const term = (qComp.value || "").trim().toLowerCase();
-  if (!term) return renderCompetencia(competencia);
+  if (!items || !items.length) {
+    newsGrid.innerHTML = `<p class="note">No hay noticias disponibles por ahora.</p>`;
+    return;
+  }
 
-  const filtered = competencia.filter(c =>
-    (c.song || "").toLowerCase().includes(term) ||
-    (c.performer || "").toLowerCase().includes(term) ||
-    (c.represented_by || "").toLowerCase().includes(term)
-  );
-
-  renderCompetencia(filtered);
+  newsGrid.innerHTML = items.map(n => `
+    <article class="card">
+      <div class="card__body">
+        <h3 class="card__name">${escapeHtml(n.title || "")}</h3>
+        ${n.excerpt ? `<p class="card__role">${escapeHtml(n.excerpt)}</p>` : ""}
+        <div class="news__meta">
+          <a href="${n.url}" target="_blank" rel="noopener noreferrer">Leer en Epicentro</a>
+        </div>
+      </div>
+    </article>
+  `).join("");
 }
 
-/* =========================
-   Eventos UI
-========================= */
+async function loadNews() {
+  if (!newsGrid) return;
+  try {
+    const r = await fetch("assets/data/noticias.json", { cache: "no-store" });
+    const data = await r.json();
+    renderNews(data.items || []);
+  } catch (e) {
+    newsGrid.innerHTML = `<p class="note">No se pudieron cargar las noticias.</p>`;
+  }
+}
+
+/* ===== Eventos UI ===== */
 function wireEvents() {
-  // Jurado: click / teclado abre modal
   if (gridJurado) {
     gridJurado.addEventListener("click", (e) => {
       const card = e.target.closest("[data-jurado-idx]");
       if (!card) return;
       const idx = Number(card.dataset.juradoIdx);
-      openModal(juradoView[idx]);
+      openModal(jurado[idx]);
     });
 
     gridJurado.addEventListener("keydown", (e) => {
@@ -162,59 +148,53 @@ function wireEvents() {
       if (!card) return;
       e.preventDefault();
       const idx = Number(card.dataset.juradoIdx);
-      openModal(juradoView[idx]);
+      openModal(jurado[idx]);
     });
   }
 
-  // Buscadores
-  if (qJurado) qJurado.addEventListener("input", filterJurado);
-  if (qComp) qComp.addEventListener("input", filterCompetencia);
-
-  // Modal cerrar
   if (modal) {
     modal.addEventListener("click", (e) => {
       if (e.target.matches("[data-close]")) closeModal();
     });
   }
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal && !modal.hidden) closeModal();
   });
 }
 
-/* =========================
-   Init
-========================= */
+/* ===== Init ===== */
 async function init() {
   const year = $("#year");
   if (year) year.textContent = String(new Date().getFullYear());
 
   wireEvents();
 
-  // Jurado (opcional)
+  // Jurado
   if (gridJurado) {
     try {
       const r = await fetch("assets/data/jurado.json", { cache: "no-store" });
       jurado = await r.json();
       renderJurado(jurado);
-    } catch (err) {
-      // Si no existe jurado.json, dejamos un mensaje (o puedes ocultar sección)
-      gridJurado.innerHTML = `<p class="note">No se pudo cargar el jurado (falta <code>assets/data/jurado.json</code>).</p>`;
+    } catch (e) {
+      gridJurado.innerHTML = `<p class="note">No se pudo cargar el jurado.</p>`;
     }
   }
 
-  // Competencia (recomendado que exista)
+  // Competencia
   if (gridComp) {
     try {
       const r = await fetch("assets/data/competencia.json", { cache: "no-store" });
       competencia = await r.json();
       renderCompetencia(competencia);
-    } catch (err) {
-      gridComp.innerHTML = `<p class="note">Error cargando competencia. Revisa <code>assets/data/competencia.json</code>.</p>`;
+    } catch (e) {
+      gridComp.innerHTML = `<p class="note">No se pudo cargar la competencia.</p>`;
     }
   }
+
+  // Noticias
+  await loadNews();
 }
 
-init().catch((err) => {
-  console.error(err);
-});
+init().catch(console.error);
 
