@@ -18,8 +18,28 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Debug (listar archivos)
+        run: |
+          echo "PWD: $(pwd)"
+          ls -la
+          echo "---- .github/workflows ----"
+          ls -la .github/workflows || true
+          echo "---- scripts ----"
+          ls -la scripts || true
+          echo "---- assets/data ----"
+          ls -la assets || true
+          ls -la assets/data || true
+
+      - name: Ensure folders
+        run: mkdir -p assets/data
+
       - name: Fetch news
-        run: python scripts/fetch_news.py
+        run: python -u scripts/fetch_news.py
+
+      - name: Show generated JSON
+        run: |
+          echo "---- noticias.json ----"
+          cat assets/data/noticias.json || true
 
       - name: Commit changes
         run: |
