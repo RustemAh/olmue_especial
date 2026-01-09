@@ -18,26 +18,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Debug (listar archivos)
-        run: |
-          echo "PWD: $(pwd)"
-          ls -la
-          echo "---- .github/workflows ----"
-          ls -la .github/workflows || true
-          echo "---- scripts ----"
-          ls -la scripts || true
-          echo "---- assets/data ----"
-          ls -la assets || true
-          ls -la assets/data || true
-
       - name: Ensure folders
         run: mkdir -p assets/data
 
       - name: Fetch news
-        run: python -u scripts/fetch_news.py
-
-      - name: Show generated JSON
         run: |
+          python -u scripts/fetch_news.py
           echo "---- noticias.json ----"
           cat assets/data/noticias.json || true
 
@@ -48,3 +34,4 @@ jobs:
           git add assets/data/noticias.json
           git commit -m "Update noticias olmue2026" || echo "No changes"
           git push
+
