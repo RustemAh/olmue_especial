@@ -99,14 +99,13 @@ function renderCompetencia(list) {
   `).join("");
 }
 
-/* ===== Noticias (lista estilo Epicentro Radio, desde JSON local) ===== */
+/* ===== Noticias (SIN FECHAS, solo títulos) ===== */
 function renderNews(items) {
   if (!newsList) return;
 
   if (!items || !items.length) {
-    newsList.innerHTML =
-      `<li class="newsitem">
-        <span class="newsitem__date"></span>
+    newsList.innerHTML = `
+      <li class="newsitem">
         <span class="newsitem__title">No hay noticias disponibles por ahora.</span>
       </li>`;
     return;
@@ -117,7 +116,6 @@ function renderNews(items) {
       <a class="newsitem__title" href="${n.url}" target="_blank" rel="noopener noreferrer">
         ${escapeHtml(n.title || "")}
       </a>
-      <span class="newsitem__date">${escapeHtml(n.date || "")}</span>
     </li>
   `).join("");
 }
@@ -198,5 +196,4 @@ async function init() {
 }
 
 init().catch(console.error);
-
 
