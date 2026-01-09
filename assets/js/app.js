@@ -117,7 +117,7 @@ function renderCompetencia(list) {
   }
 
   gridComp.innerHTML = competenciaView.map((c, idx) => `
-    <article class="card" aria-label="Competencia ${idx + 1}">
+    <article class="card card--comp" aria-label="Competencia ${idx + 1}">
       <div class="card__body">
         <span class="badge">#${idx + 1}</span>
         <h3 class="card__name">${escapeHtml(c.song || "")}</h3>
