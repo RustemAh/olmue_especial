@@ -4,7 +4,7 @@ from html import unescape
 
 TAG_URL = "https://www.epicentrochile.com/tag/olmue2026/"
 OUT_FILE = "assets/data/noticias.json"
-LIMIT = 6
+LIMIT = 10
 
 def fetch(url: str) -> str:
   req = Request(url, headers={"User-Agent": "Mozilla/5.0 (GitHub Actions)"})
@@ -17,28 +17,48 @@ def clean_text(s: str) -> str:
   s = re.sub(r"\s+", " ", s).strip()
   return s
 
+# Ej: "lunes 22 diciembre de 2025"
+DATE_RE = re.compile(
+  r"^(lunes|martes|miércoles|jueves|viernes|sábado|domingo)\s+\d{1,2}\s+\w+\s+de\s+\d{4}",
+  re.IGNORECASE
+)
+
 def main():
   html = fetch(TAG_URL)
 
-  # Links típicos de posts WP: https://www.epicentrochile.com/YYYY/MM/DD/slug/
-  link_re = re.compile(
-    r'href="(https://www\.epicentrochile\.com/\d{4}/\d{2}/\d{2}/[^"]+/)"[^>]*>([^<]+)</a>'
+  # Captura cada <li> del listado: <li><a href="...">TITULO</a> FECHA BAJADA </li>
+  li_re = re.compile(
+    r"<li[^>]*>\s*<a[^>]*href=\"(https://www\.epicentrochile\.com/[^\"]+)\"[^>]*>(.*?)</a>\s*(.*?)\s*</li>",
+    re.IGNORECASE | re.DOTALL
   )
 
   items = []
   seen = set()
 
-  for url, title in link_re.findall(html):
-    title = clean_text(title)
-    if not title or url in seen:
+  for url, title_html, tail_html in li_re.findall(html):
+    if url in seen:
       continue
     seen.add(url)
 
-    items.append({
-      "title": title,
-      "url": url,
-      "excerpt": ""
-    })
+    title = clean_text(title_html)
+    tail = clean_text(tail_html)
+
+    date = ""
+    excerpt = ""
+    m = DATE_RE.match(tail)
+    if m:
+      date = m.group(0)
+      excerpt = tail[len(date):].strip()
+    else:
+      excerpt = tail
+
+    if title:
+      items.append({
+        "title": title,
+        "url": url,
+        "date": date,
+        "excerpt": excerpt
+      })
 
     if len(items) >= LIMIT:
       break
