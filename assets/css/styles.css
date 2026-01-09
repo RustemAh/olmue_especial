@@ -88,6 +88,21 @@ body{
   padding: 18px 0 10px;
 }
 
+.hero__banner{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.hero__banner img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .hero__inner{
   background: var(--surface);
   border: 1px solid var(--line);
