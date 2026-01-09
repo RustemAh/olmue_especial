@@ -1,22 +1,42 @@
 [
   {
-    "name": "Nombre Apellido",
-    "role": "Artista / Periodista / Jurado",
-    "tag": "Invitado",
-    "bio": "Breve descripción (1–3 líneas).",
-    "photo": "assets/img/jurado/persona1.jpg",
-    "links": [
-      { "label": "Instagram", "url": "https://instagram.com/" }
-    ]
+    "name": "Gonzalo Fouillioux",
+    "role": "Periodista deportivo (TVN / TNT Sports)",
+    "tag": "TV",
+    "bio": "Periodista deportivo de TVN y TNT Sports. Será parte del panel encargado de analizar las canciones en competencia y definir quién se llevará el premio.",
+    "photo": "assets/img/jurado/gonzalo-fouillioux.jpg",
+    "links": []
   },
   {
-    "name": "Nombre Apellido 2",
-    "role": "Comunicador/a",
-    "tag": "Nacional",
-    "bio": "Otra breve descripción.",
-    "photo": "assets/img/jurado/persona2.jpg",
-    "links": [
-      { "label": "Sitio web", "url": "https://example.com" }
-    ]
+    "name": "Carolina Urrejola",
+    "role": "Periodista y conductora de 24 Horas Central",
+    "tag": "TVN",
+    "bio": "Periodista y actual conductora de 24 Horas Central. Cuenta con una destacada trayectoria también en radio, aportando análisis y experiencia al jurado.",
+    "photo": "assets/img/jurado/carolina-urrejola.jpg",
+    "links": []
+  },
+  {
+    "name": "Manuel Caro (\"Dunga\")",
+    "role": "Músico — Vocalista y miembro fundador de La Combo Tortuga",
+    "tag": "Música",
+    "bio": "Más conocido como “Dunga”, es vocalista y miembro fundador de la banda de cumbia La Combo Tortuga. Su experiencia en el mundo de la música aportará una mirada técnica al panel.",
+    "photo": "assets/img/jurado/manuel-caro-dunga.jpg",
+    "links": []
+  },
+  {
+    "name": "Pablo Flamm",
+    "role": "Periodista (Radio Bío Bío)",
+    "tag": "Radio",
+    "bio": "Periodista multifacético de Radio Bío Bío. Fue considerado para evaluar a los participantes y aportar una mirada comunicacional y de criterio editorial.",
+    "photo": "assets/img/jurado/pablo-flamm.jpg",
+    "links": []
+  },
+  {
+    "name": "Wladimir Campos",
+    "role": "Músico (Olmué) — Folclore",
+    "tag": "Folclore",
+    "bio": "Músico oriundo de Olmué con más de 20 años de experiencia en el folclore. Completa el panel del jurado aportando la cuota de experticia local y musical.",
+    "photo": "assets/img/jurado/wladimir-campos.jpg",
+    "links": []
   }
 ]
