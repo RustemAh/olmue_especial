@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Nombre Apellido",
+    "role": "Artista / Periodista / Jurado",
+    "tag": "Invitado",
+    "bio": "Breve descripción (1–3 líneas).",
+    "photo": "assets/img/jurado/persona1.jpg",
+    "links": [
+      { "label": "Instagram", "url": "https://instagram.com/" }
+    ]
+  },
+  {
+    "name": "Nombre Apellido 2",
+    "role": "Comunicador/a",
+    "tag": "Nacional",
+    "bio": "Otra breve descripción.",
+    "photo": "assets/img/jurado/persona2.jpg",
+    "links": [
+      { "label": "Sitio web", "url": "https://example.com" }
+    ]
+  }
+]
