@@ -223,21 +223,58 @@ body{
   color: rgba(255,255,255,.92);
 }
 
-/* Noticias */
-.grid--news .card{ grid-column: span 4; }
-.news__meta{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  margin-top:10px;
+/* Noticias (lista estilo Epicentro Radio) */
+.newsbox{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.newslist{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.newsitem{
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+.newsitem:first-child{ border-top: 0; }
+
+.newsitem__title{
+  flex: 1;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.newsitem__title:hover{ text-decoration: underline; }
+
+.newsitem__date{
+  white-space: nowrap;
   color: var(--muted);
   font-size: 12px;
 }
-.news__meta a{
+
+.newsbox__more{
+  display: block;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
   color: var(--accent);
-  text-decoration:none;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  background: #fafafa;
 }
-.news__meta a:hover{ text-decoration:underline; }
+.newsbox__more:hover{ text-decoration: underline; }
 
 /* Footer */
 .footer{
@@ -310,7 +347,6 @@ body{
 /* Responsive */
 @media (max-width: 1020px){
   .card{ grid-column: span 4; }
-  .grid--news .card{ grid-column: span 6; }
 }
 @media (max-width: 760px){
   .card{ grid-column: span 6; }
@@ -319,6 +355,11 @@ body{
 }
 @media (max-width: 480px){
   .card{ grid-column: span 12; }
-  .grid--news .card{ grid-column: span 12; }
+  .newsitem{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .newsitem__date{ order: -1; }
 }
 
