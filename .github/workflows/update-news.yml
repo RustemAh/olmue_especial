@@ -1,0 +1,30 @@
+name: Update noticias (Epicentro olmue2026)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"  # cada 6 horas
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch news
+        run: python scripts/fetch_news.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add assets/data/noticias.json
+          git commit -m "Update noticias olmue2026" || echo "No changes"
+          git push
