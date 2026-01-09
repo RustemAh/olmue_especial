@@ -360,3 +360,17 @@ body{
 @media (max-width: 480px){
   .card{ grid-column: span 12; } /* 1 columna */
 }
+.media__frame{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.media__frame img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
