@@ -20,9 +20,12 @@ def clean_text(s: str) -> str:
 def main():
   html = fetch(TAG_URL)
 
-  # Captura links a posts: https://www.epicentrochile.com/YYYY/MM/DD/slug/
-  link_re = re.compile(r'href="(https://www\.epicentrochile\.com/\d{4}/\d{2}/\d{2}/[^"]+/)"[^>]*>([^<]+)</a>')
-  found = []
+  # Links típicos de posts WP: https://www.epicentrochile.com/YYYY/MM/DD/slug/
+  link_re = re.compile(
+    r'href="(https://www\.epicentrochile\.com/\d{4}/\d{2}/\d{2}/[^"]+/)"[^>]*>([^<]+)</a>'
+  )
+
+  items = []
   seen = set()
 
   for url, title in link_re.findall(html):
@@ -30,14 +33,17 @@ def main():
     if not title or url in seen:
       continue
     seen.add(url)
-    found.append({"title": title, "url": url, "excerpt": ""})
-    if len(found) >= LIMIT:
+
+    items.append({
+      "title": title,
+      "url": url,
+      "excerpt": ""
+    })
+
+    if len(items) >= LIMIT:
       break
 
-  payload = {
-    "source": TAG_URL,
-    "items": found
-  }
+  payload = {"source": TAG_URL, "items": items}
 
   with open(OUT_FILE, "w", encoding="utf-8") as f:
     json.dump(payload, f, ensure_ascii=False, indent=2)
