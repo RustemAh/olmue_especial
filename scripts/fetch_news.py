@@ -1,95 +1,89 @@
-import json, re
+import json
+import re
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
-TAG_URL = "https://www.epicentrochile.com/tag/olmue2026/"
+SITE = "https://www.epicentrochile.com"
+TAG_SLUG = "olmue2026"
 OUT_FILE = "assets/data/noticias.json"
+LIMIT = 10
 
-LIMIT = 12          # cuántas noticias quieres mostrar
-MAX_PAGES = 5       # por si el tag crece y tiene /page/2/, /page/3/...
+def http_get_json(url: str):
+  req = Request(
+    url,
+    headers={
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+      "Accept": "application/json,text/plain,*/*",
+      "Accept-Language": "es-CL,es;q=0.9,en;q=0.8",
+      "Connection": "close",
+    }
+  )
+  with urlopen(req, timeout=40) as r:
+    data = r.read().decode("utf-8", errors="ignore")
+  return json.loads(data)
 
-RE_POST_URL = re.compile(r'https://www\.epicentrochile\.com/\d{4}/\d{2}/\d{2}/[^"\s<>]+/?')
-RE_OG_TITLE = re.compile(r'<meta\s+property="og:title"\s+content="([^"]+)"', re.IGNORECASE)
-RE_PUB_TIME = re.compile(r'<meta\s+property="article:published_time"\s+content="([^"]+)"', re.IGNORECASE)
-RE_H1 = re.compile(r'<h1[^>]*>(.*?)</h1>', re.IGNORECASE | re.DOTALL)
-
-def fetch(url: str) -> str:
-  req = Request(url, headers={"User-Agent": "Mozilla/5.0 (GitHub Actions)"})
-  with urlopen(req, timeout=30) as r:
-    return r.read().decode("utf-8", errors="ignore")
-
-def clean_html(s: str) -> str:
-  # Limpieza mínima (sin dependencias externas)
-  s = re.sub(r"<[^>]+>", " ", s or "")
+def strip_html(s: str) -> str:
+  s = s or ""
+  s = re.sub(r"<[^>]+>", " ", s)
   s = s.replace("&nbsp;", " ").replace("&amp;", "&").replace("&quot;", "\"").replace("&#039;", "'")
   s = re.sub(r"\s+", " ", s).strip()
   return s
 
-def get_post_meta(post_url: str) -> dict:
-  html = fetch(post_url)
-
-  title = ""
-  m = RE_OG_TITLE.search(html)
-  if m:
-    title = clean_html(m.group(1))
-  else:
-    m = RE_H1.search(html)
-    if m:
-      title = clean_html(m.group(1))
-
-  published = ""
-  m = RE_PUB_TIME.search(html)
-  if m:
-    published = m.group(1).strip()  # suele venir ISO: 2025-12-22T13:25:00-03:00
-
-  # fallback: fecha desde la URL (YYYY/MM/DD)
-  if not published:
-    mm = re.search(r"/(\d{4})/(\d{2})/(\d{2})/", post_url)
-    if mm:
-      published = f"{mm.group(1)}-{mm.group(2)}-{mm.group(3)}"
-
-  return {"title": title or post_url, "date": published}
-
 def main():
-  urls_in_order = []
-  seen = set()
+  # 1) Buscar el tag por slug/nombre
+  tags_url = f"{SITE}/wp-json/wp/v2/tags?search={TAG_SLUG}&per_page=50"
+  tags = http_get_json(tags_url)
 
-  for page in range(1, MAX_PAGES + 1):
-    page_url = TAG_URL if page == 1 else f"{TAG_URL}page/{page}/"
-    html = fetch(page_url)
-
-    found = RE_POST_URL.findall(html)
-    if not found:
+  tag_id = None
+  for t in tags:
+    # preferimos match exacto por slug
+    if str(t.get("slug", "")).lower() == TAG_SLUG.lower():
+      tag_id = t.get("id")
       break
+  if tag_id is None and tags:
+    tag_id = tags[0].get("id")
 
-    added_this_page = 0
-    for u in found:
-      # normaliza (sin fragmentos raros)
-      u = u.split("#")[0]
-      if u not in seen:
-        seen.add(u)
-        urls_in_order.append(u)
-        added_this_page += 1
-      if len(urls_in_order) >= LIMIT:
-        break
+  if not tag_id:
+    raise RuntimeError(f"No se encontró el tag '{TAG_SLUG}' en la API.")
 
-    if len(urls_in_order) >= LIMIT:
-      break
-    if added_this_page == 0:
-      break
+  # 2) Traer posts del tag
+  posts_url = (
+    f"{SITE}/wp-json/wp/v2/posts"
+    f"?tags={tag_id}&per_page={LIMIT}"
+    f"&_fields=link,date,title,excerpt"
+  )
+  posts = http_get_json(posts_url)
 
   items = []
-  for u in urls_in_order[:LIMIT]:
-    meta = get_post_meta(u)
-    items.append({
-      "title": meta["title"],
-      "url": u,
-      "date": meta["date"]
-    })
+  for p in posts:
+    title = strip_html((p.get("title") or {}).get("rendered", ""))
+    excerpt = strip_html((p.get("excerpt") or {}).get("rendered", ""))
+    url = p.get("link", "")
+    date = p.get("date", "")  # ISO
 
-  payload = {"source": TAG_URL, "items": items}
+    if title and url:
+      items.append({
+        "title": title,
+        "url": url,
+        "date": date,
+        "excerpt": excerpt
+      })
+
+  payload = {"source": f"{SITE}/tag/{TAG_SLUG}/", "items": items}
+
+  # asegurar carpeta destino existe (por si corres local)
+  import os
+  os.makedirs("assets/data", exist_ok=True)
 
   with open(OUT_FILE, "w", encoding="utf-8") as f:
     json.dump(payload, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-  main()
+  try:
+    main()
+  except (HTTPError, URLError) as e:
+    # Si el sitio bloquea, dejamos JSON vacío pero el workflow NO revienta.
+    import os
+    os.makedirs("assets/data", exist_ok=True)
+    with open(OUT_FILE, "w", encoding="utf-8") as f:
+      json.dump({"source": f"{SITE}/tag/{TAG_SLUG}/", "items": [], "error": str(e)}, f, ensure_ascii=False, indent=2)
