@@ -1,9 +1,9 @@
-name: Update noticias (Epicentro olmue2026)
+name: Update news JSON
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"  # cada 6 horas
+    - cron: "*/5 * * * *"  # cada 30 minutos (puedes cambiarlo)
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,20 +18,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Ensure folders
-        run: mkdir -p assets/data
+      - name: Run fetch_news
+        run: python scripts/fetch_news.py
 
-      - name: Fetch news
-        run: |
-          python -u scripts/fetch_news.py
-          echo "---- noticias.json ----"
-          cat assets/data/noticias.json || true
-
-      - name: Commit changes
+      - name: Commit & push if changed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add assets/data/noticias.json
-          git commit -m "Update noticias olmue2026" || echo "No changes"
+          git commit -m "Update noticias.json" || exit 0
           git push
-
