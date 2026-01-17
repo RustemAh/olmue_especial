@@ -223,6 +223,29 @@ body{
   color: rgba(255,255,255,.92);
 }
 
+/* === Destacar semifinalistas === */
+.card--comp.is-semifinalista{
+  position: relative;
+  border: 2px solid #ffd54a;
+  box-shadow:
+    0 0 0 4px rgba(255, 213, 74, .18),
+    0 12px 28px rgba(0,0,0,.25);
+  transform: translateY(-2px);
+}
+
+/* Badge semifinalista (arriba a la derecha) */
+.card--comp .badge--semi{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin-top: 0; /* anula margin-top de .badge */
+  background: #ffd54a;
+  border-color: #ffd54a;
+  color: #111827;
+  font-weight: 900;
+}
+
+
 /* Noticias (lista estilo Epicentro Radio) */
 .newsbox{
   background: var(--surface);
