@@ -1,218 +1,178 @@
+/**
+ * Especial Viña 2026 - El Epicentro
+ * Lógica central para carga de datos dinámicos
+ */
+
 const $ = (sel) => document.querySelector(sel);
 
-const gridJurado = $("#grid");
-const gridComp = $("#compGrid");
-const newsList = $("#newsList");
+// CONFIGURACIÓN DE RUTAS Y DATOS
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQK-V9ZNN6S14OYLQGFQJ_si0sR7r1kSFmJCgrBC1k6MtCoJuk8ObmJTwiCAeBTbUirne-R-G8d9mqx/pub?gid=0&single=true&output=csv';
+const NEWS_DATA = 'assets/data/noticias.json';
+const JURADO_DATA = 'assets/data/jurado.json';
+const COMP_DATA = 'assets/data/competencia.json';
 
-const modal = $("#modal");
-const modalImg = $("#modalImg");
-const modalTitle = $("#modalTitle");
-const modalRole = $("#modalRole");
-const modalBio = $("#modalBio");
-const modalLinks = $("#modalLinks");
+/* --- 1. CARGAR PROGRAMACIÓN (GOOGLE SHEETS) --- 
+   Agrupa artistas por día en columnas verticales
+-------------------------------------------------- */
+async function loadParrilla() {
+    const cont = $("#parrillaContainer");
+    if (!cont) return;
 
-let jurado = [];
-let competencia = [];
+    try {
+        const r = await fetch(`${SHEET_CSV}&t=${new Date().getTime()}`);
+        const text = await r.text();
+        const filas = text.split(/\r?\n/).slice(1);
+        
+        const programacion = {};
 
-function escapeHtml(str = "") {
-  return String(str).replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;"
-  }[m]));
+        filas.forEach(f => {
+            const cols = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            if (cols.length >= 2) {
+                const dia = cols[0].replace(/"/g, "").trim();
+                const artista = cols[1].replace(/"/g, "").trim();
+                const img = cols[2] ? cols[2].replace(/"/g, "").trim() : "";
+
+                if (!programacion[dia]) programacion[dia] = [];
+                programacion[dia].push({ nombre: artista, foto: img });
+            }
+        });
+
+        cont.innerHTML = '';
+
+        for (const dia in programacion) {
+            const artistasHTML = programacion[dia].map(art => `
+                <div class="artista-mini">
+                    <img src="${art.foto || 'https://via.placeholder.com/50'}" alt="${art.nombre}" loading="lazy">
+                    <span>${art.nombre}</span>
+                </div>
+            `).join('');
+
+            cont.innerHTML += `
+                <article class="dia-columna">
+                    <div class="dia-header">${dia}</div>
+                    <div class="dia-artistas">
+                        ${artistasHTML}
+                    </div>
+                </article>
+            `;
+        }
+    } catch (e) {
+        console.error("Error Sheets:", e);
+        cont.innerHTML = "<p class='note'>Actualizando programación...</p>";
+    }
 }
 
-/* ===== Modal Jurado ===== */
-function openModal(person) {
-  if (!modal || !person) return;
-
-  modalImg.src = person.photo || "";
-  modalImg.alt = person.name ? `Foto de ${person.name}` : "Foto";
-
-  modalTitle.textContent = person.name || "";
-  modalRole.textContent = person.role || "";
-  modalBio.textContent = person.bio || "";
-
-  if (Array.isArray(person.links) && person.links.length) {
-    modalLinks.innerHTML = person.links
-      .map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.label)}</a>`)
-      .join(" · ");
-  } else {
-    modalLinks.innerHTML = "";
-  }
-
-  modal.hidden = false;
-  document.body.style.overflow = "hidden";
-}
-
-function closeModal() {
-  if (!modal) return;
-  modal.hidden = true;
-  document.body.style.overflow = "";
-}
-
-/* ===== Render Jurado ===== */
-function renderJurado(list) {
-  if (!gridJurado) return;
-
-  if (!list.length) {
-    gridJurado.innerHTML = `<p class="note">No hay jurado para mostrar.</p>`;
-    return;
-  }
-
-  gridJurado.innerHTML = list.map((p, idx) => `
-    <article class="card" role="button" tabindex="0"
-      aria-label="Ver ${escapeHtml(p.name || "integrante")}"
-      data-jurado-idx="${idx}">
-      <div class="card__media">
-        <img src="${p.photo || ""}" alt="Foto de ${escapeHtml(p.name || "")}" loading="lazy" />
-      </div>
-      <div class="card__body">
-        <h3 class="card__name">${escapeHtml(p.name || "")}</h3>
-        <p class="card__role">${escapeHtml(p.role || "")}</p>
-        ${p.tag ? `<span class="badge">● ${escapeHtml(p.tag)}</span>` : ""}
-      </div>
-    </article>
-  `).join("");
-}
-
-/* ===== Render Competencia (Semifinalistas primero + destacado) ===== */
-function renderCompetencia(list) {
-  if (!gridComp) return;
-
-  if (!list.length) {
-    gridComp.innerHTML = `<p class="note">No hay competencia para mostrar.</p>`;
-    return;
-  }
-
-  // ✅ Semifinalistas (los 4 que indicaste)
-  const semifinalistas = new Set([
-    "Vamos juntos a Chiloé",
-    "La Curandera María",
-    "Vuelve a mi lado",
-    "Se enamoró la paloma"
-  ]);
-
-  // ✅ Ordenar: semifinalistas primero, sin romper el orden interno de cada grupo
-  const ordered = [...list].sort((a, b) => {
-    const A = semifinalistas.has((a.song || "").trim()) ? 0 : 1;
-    const B = semifinalistas.has((b.song || "").trim()) ? 0 : 1;
-    return A - B;
-  });
-
-  gridComp.innerHTML = ordered.map((c, idx) => {
-    const semi = semifinalistas.has((c.song || "").trim());
-
-    return `
-      <article class="card card--comp ${semi ? "is-semifinalista" : ""}" aria-label="Competencia ${idx + 1}">
-        <div class="card__body">
-          ${semi ? `<span class="badge badge--semi">Semifinalista</span>` : ""}
-          <span class="badge">#${idx + 1}</span>
-          <h3 class="card__name">${escapeHtml(c.song || "")}</h3>
-          <p class="card__role"><strong>Intérprete:</strong> ${escapeHtml(c.performer || "")}</p>
-          <p class="card__role"><strong>Representado por:</strong> ${escapeHtml(c.represented_by || "")}</p>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-/* ===== Noticias (SIN FECHAS, solo títulos) ===== */
-function renderNews(items) {
-  if (!newsList) return;
-
-  if (!items || !items.length) {
-    newsList.innerHTML = `
-      <li class="newsitem">
-        <span class="newsitem__title">No hay noticias disponibles por ahora.</span>
-      </li>`;
-    return;
-  }
-
-  newsList.innerHTML = items.map(n => `
-    <li class="newsitem">
-      <a class="newsitem__title" href="${n.url}" target="_blank" rel="noopener noreferrer">
-        ${escapeHtml(n.title || "")}
-      </a>
-    </li>
-  `).join("");
-}
-
+/* --- 2. CARGAR NOTICIAS (JSON WP) --- 
+--------------------------------------- */
 async function loadNews() {
-  if (!newsList) return;
-  try {
-    const r = await fetch("assets/data/noticias.json", { cache: "no-store" });
-    const data = await r.json();
-    renderNews(data.items || []);
-  } catch (e) {
-    renderNews([]);
-  }
-}
+    const list = $("#newsList");
+    if (!list) return;
 
-/* ===== Eventos UI ===== */
-function wireEvents() {
-  if (gridJurado) {
-    gridJurado.addEventListener("click", (e) => {
-      const card = e.target.closest("[data-jurado-idx]");
-      if (!card) return;
-      const idx = Number(card.dataset.juradoIdx);
-      openModal(jurado[idx]);
-    });
-
-    gridJurado.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      const card = e.target.closest("[data-jurado-idx]");
-      if (!card) return;
-      e.preventDefault();
-      const idx = Number(card.dataset.juradoIdx);
-      openModal(jurado[idx]);
-    });
-  }
-
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target.matches("[data-close]")) closeModal();
-    });
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal && !modal.hidden) closeModal();
-  });
-}
-
-/* ===== Init ===== */
-async function init() {
-  const year = $("#year");
-  if (year) year.textContent = String(new Date().getFullYear());
-
-  wireEvents();
-
-  // Jurado
-  if (gridJurado) {
     try {
-      const r = await fetch("assets/data/jurado.json", { cache: "no-store" });
-      jurado = await r.json();
-      renderJurado(jurado);
+        const r = await fetch(`${NEWS_DATA}?t=${Date.now()}`);
+        const data = await r.json();
+        
+        if (data.items && data.items.length > 0) {
+            list.innerHTML = data.items.map(n => `
+                <li class="newsitem">
+                    <a href="${n.url}" target="_blank" rel="noopener noreferrer">${n.title}</a>
+                </li>
+            `).join('');
+        } else {
+            list.innerHTML = "<li class='newsitem'>No hay noticias disponibles en este momento.</li>";
+        }
     } catch (e) {
-      gridJurado.innerHTML = `<p class="note">No se pudo cargar el jurado.</p>`;
+        list.innerHTML = "<li class='newsitem'>Sincronizando con El Epicentro...</li>";
     }
-  }
-
-  // Competencia
-  if (gridComp) {
-    try {
-      const r = await fetch("assets/data/competencia.json", { cache: "no-store" });
-      competencia = await r.json();
-      renderCompetencia(competencia);
-    } catch (e) {
-      gridComp.innerHTML = `<p class="note">No se pudo cargar la competencia.</p>`;
-    }
-  }
-
-  // Noticias
-  await loadNews();
 }
 
-init().catch(console.error);
+/* --- 3. CARGAR JURADO --- 
+--------------------------- */
+async function loadJurado() {
+    const grid = $("#grid");
+    if (!grid) return;
+
+    try {
+        const r = await fetch(JURADO_DATA);
+        const data = await r.json();
+        window.juradoData = data;
+        
+        grid.innerHTML = data.map((p, i) => `
+            <div class="card" onclick="showJurado(${i})" role="button" tabindex="0">
+                <img src="${p.photo}" alt="${p.name}" loading="lazy">
+                <div class="card__body">
+                    <h4 style="margin:0; font-size:15px;">${p.name}</h4>
+                    <small style="color:var(--muted)">${p.role}</small>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) { console.error("Error Jurado:", e); }
+}
+
+/* --- 4. CARGAR COMPETENCIA (INTERNACIONAL Y FOLCLÓRICA) --- 
+------------------------------------------------------------ */
+async function loadCompetencia() {
+    const grid = $("#compGrid");
+    if (!grid) return;
+
+    try {
+        const r = await fetch(COMP_DATA);
+        const data = await r.json();
+        
+        grid.innerHTML = data.map((c) => `
+            <article class="card" style="background: #0b2a5b; border-left: 5px solid ${c.category === 'Folclórica' ? 'var(--naranja)' : 'var(--magenta)'}; color: white;">
+                <div class="card__body">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span class="badge" style="background: rgba(255,255,255,0.1); border:none; color:white; font-size:10px; padding: 2px 6px; border-radius:4px;">${c.category}</span>
+                        <span style="font-size:12px; font-weight:800; color:var(--naranja)">${c.country}</span>
+                    </div>
+                    <h3 style="margin:0; font-size:15px; color:#fff;">${c.song}</h3>
+                    <p style="margin:5px 0 0; font-size:13px; opacity:0.8;">${c.performer}</p>
+                </div>
+            </article>
+        `).join("");
+    } catch (e) { console.error("Error Competencia:", e); }
+}
+
+/* --- CONTROL DEL MODAL --- 
+---------------------------- */
+window.showJurado = (i) => {
+    const p = window.juradoData[i];
+    if(!p) return;
+
+    $("#modalImg").src = p.photo;
+    $("#modalTitle").textContent = p.name;
+    $("#modalBio").textContent = p.bio;
+    
+    const modal = $("#modal");
+    modal.classList.add('is-active');
+    document.body.style.overflow = "hidden";
+}
+
+const closeModal = () => {
+    $("#modal").classList.remove('is-active');
+    document.body.style.overflow = "auto";
+};
+
+// Asignación de eventos de cierre
+if($("#closeModal")) $("#closeModal").onclick = closeModal;
+if($("#btnCerrarModal")) $("#btnCerrarModal").onclick = closeModal;
+
+// Cierre con tecla Escape
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+});
+
+/* --- INICIALIZACIÓN --- 
+------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+    // Actualizar año en footer
+    const yearSpan = $("#year");
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    
+    // Ejecutar todas las cargas
+    loadParrilla();
+    loadNews();
+    loadJurado();
+    loadCompetencia();
+});
