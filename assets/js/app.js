@@ -78,7 +78,7 @@ function renderJurado(list) {
   `).join("");
 }
 
-/* ===== Render Competencia (Semifinalistas primero + destacado) ===== */
+/* ===== Render Competencia ===== */
 function renderCompetencia(list) {
   if (!gridComp) return;
 
@@ -87,36 +87,16 @@ function renderCompetencia(list) {
     return;
   }
 
-  // ✅ Semifinalistas (los 4 que indicaste)
-  const semifinalistas = new Set([
-    "Vamos juntos a Chiloé",
-    "La Curandera María",
-    "Vuelve a mi lado",
-    "Se enamoró la paloma"
-  ]);
-
-  // ✅ Ordenar: semifinalistas primero, sin romper el orden interno de cada grupo
-  const ordered = [...list].sort((a, b) => {
-    const A = semifinalistas.has((a.song || "").trim()) ? 0 : 1;
-    const B = semifinalistas.has((b.song || "").trim()) ? 0 : 1;
-    return A - B;
-  });
-
-  gridComp.innerHTML = ordered.map((c, idx) => {
-    const semi = semifinalistas.has((c.song || "").trim());
-
-    return `
-      <article class="card card--comp ${semi ? "is-semifinalista" : ""}" aria-label="Competencia ${idx + 1}">
-        <div class="card__body">
-          ${semi ? `<span class="badge badge--semi">Semifinalista</span>` : ""}
-          <span class="badge">#${idx + 1}</span>
-          <h3 class="card__name">${escapeHtml(c.song || "")}</h3>
-          <p class="card__role"><strong>Intérprete:</strong> ${escapeHtml(c.performer || "")}</p>
-          <p class="card__role"><strong>Representado por:</strong> ${escapeHtml(c.represented_by || "")}</p>
-        </div>
-      </article>
-    `;
-  }).join("");
+  gridComp.innerHTML = list.map((c, idx) => `
+    <article class="card card--comp" aria-label="Competencia ${idx + 1}">
+      <div class="card__body">
+        <span class="badge">#${idx + 1}</span>
+        <h3 class="card__name">${escapeHtml(c.song || "")}</h3>
+        <p class="card__role"><strong>Intérprete:</strong> ${escapeHtml(c.performer || "")}</p>
+        <p class="card__role"><strong>Representado por:</strong> ${escapeHtml(c.represented_by || "")}</p>
+      </div>
+    </article>
+  `).join("");
 }
 
 /* ===== Noticias (SIN FECHAS, solo títulos) ===== */
